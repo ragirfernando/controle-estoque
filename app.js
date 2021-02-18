@@ -2,13 +2,9 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const cors = require('cors');
 
-const rotaProdutos = require('./routes/produtos');
-const rotaUsuario = require('./routes/usuario');
-const rotaMovimentacao = require('./routes/movimentacao');
-const rotaCategoria = require('./routes/categoria');
-
-
+app.use(cors());
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false})); //apenas dados simples
 app.use(bodyParser.json()); //Apenas formato JSON
@@ -16,7 +12,7 @@ app.use(bodyParser.json()); //Apenas formato JSON
 app.use((req, res, next) =>{
     res.header('Access-Control-Allow-Origin', '*');
     res.header(
-        'Access-Control-Allow-Headers',
+        'Access-Controll-Allow-Header',
         'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     );
 
@@ -26,6 +22,11 @@ app.use((req, res, next) =>{
     }
     next();
 })
+
+const rotaProdutos = require('./routes/produtos');
+const rotaUsuario = require('./routes/usuario');
+const rotaMovimentacao = require('./routes/movimentacao');
+const rotaCategoria = require('./routes/categoria');
 
 app.use('/produtos', rotaProdutos);
 app.use('/usuarios', rotaUsuario);

@@ -36,6 +36,7 @@ exports.postUsuario = async (req, res, next) => {
 
 exports.postUsuarioLogin = async (req, res, next) => {
     try {
+        console.log('req')
         const consultaUsuarioCadastrado = `SELECT * FROM usuario where email = ?`;
         const usuarioCadastrado = await mysql.execute(consultaUsuarioCadastrado, [req.body.email]);
 
@@ -45,7 +46,6 @@ exports.postUsuarioLogin = async (req, res, next) => {
         }
         const match = await bcrypt.compare(req.body.senha, usuarioCadastrado[0].senha);
 
-        console.log(match)
         if (usuarioCadastrado) {
             if (match) {
                 const token = jwt.sign({
@@ -57,14 +57,16 @@ exports.postUsuarioLogin = async (req, res, next) => {
                         expiresIn: "24h"
                     });
 
-                return res.status(200).send({
-                    mensagem: 'Autenticado com sucesso',
+                response = {
+                    user: usuarioCadastrado,
                     token: token
-                })
+                }
+
+                return res.status(200).send(response)
             }
         }
 
-        return res.status(401).send({ mensagem: 'Falha na autenticação' })
+        return res.status(401).send({ message: 'Falha na autenticação' })
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }
