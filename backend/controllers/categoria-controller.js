@@ -52,17 +52,17 @@ exports.putCategoria = async (req, res, next) => {
 
 exports.getCategoria = async (req, res, next) => {
     try {
-        const result = await mysql.execute(`SELECT *FROM categoria`)
-        const response = {
-            categoria: result,
-            request: {
-                tipo: 'GET',
-                descricao: 'Retorna todas as categorias',
-                url: 'http://localhost:3000/categoria/'
-            }
+        const categorias = await mysql.execute(`SELECT *FROM categoria`)
+        // const response = {
+        //     categoria: result,
+        //     request: {
+        //         tipo: 'GET',
+        //         descricao: 'Retorna todas as categorias',
+        //         url: 'http://localhost:3000/categoria/'
+        //     }
 
-        }
-        return res.status(200).send({ response })
+        // }
+        return res.status(200).send(categorias)
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }

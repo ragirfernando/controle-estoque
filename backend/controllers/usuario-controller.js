@@ -36,7 +36,7 @@ exports.postUsuario = async (req, res, next) => {
 
 exports.postUsuarioLogin = async (req, res, next) => {
     try {
-        console.log('req')
+        console.log(req.body.senha)
         const consultaUsuarioCadastrado = `SELECT * FROM usuario where email = ?`;
         const usuarioCadastrado = await mysql.execute(consultaUsuarioCadastrado, [req.body.email]);
 

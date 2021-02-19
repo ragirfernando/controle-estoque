@@ -4,27 +4,21 @@ const mysql = require('../mysql');
 exports.postProduto = async (req, res, next) => {
     try {
         console.log(req.body.nome)
-        const query = `INSERT INTO produto (nome, preco, quantidade, id_categoria) VALUES (?, ?, ?, ?)`;
+        const query = `INSERT INTO produto (nome, preco, quantidade) VALUES (?, ?, ?)`;
 
         const result = await mysql.execute(query, [
             req.body.nome,
             req.body.preco,
             req.body.quantidade,
-            req.body.id_categoria
         ]);
 
 
         const response = {
-            message: 'Produto inserido com sucesso',
             produto: {
                 id: result.insertId,
                 nome: req.body.nome,
                 preco: req.body.preco,
                 quantidade: req.body.quantidade,
-                request: {
-                    type: 'POST',
-                    url: 'http://localhost:3000/produtos/'
-                }
             }
         }
         return res.status(201).send(response);
@@ -35,38 +29,30 @@ exports.postProduto = async (req, res, next) => {
 
 
 exports.putProduto = async (req, res, next) => {
-    console.log(new Date)
     try {
         const query = `UPDATE produto
                        SET 
                         nome =?,
                         preco =?,
-                        quantidade =?,
-                        id_categoria =?
+                        quantidade =?
                     WHERE id =?`;
 
         const result = await mysql.execute(query, [
             req.body.nome,
             req.body.preco,
             req.body.quantidade,
-            req.body.id_categoria,
             req.body.id
         ]);
 
         const response = {
-            message: 'Produto atualizado com sucesso',
             produto: {
                 id: req.body.id,
                 nome: req.body.nome,
                 preco: req.body.preco,
-                quantidade: req.body.quantidade,
-                request: {
-                    type: 'PUT',
-                    url: 'http://localhost:3000/produtos/'
-                }
+                quantidade: req.body.quantidade
             }
         }
-        return res.status(200).send({ response })
+        return res.status(200).send(response)
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }
@@ -77,31 +63,29 @@ exports.putProduto = async (req, res, next) => {
 exports.getProduto = async (req, res, next) => {
     console.log(req.usuario)
     try {
-        const result = await mysql.execute(
-            `select produto.id as idProduto, produto.nome, produto.preco, produto.quantidade, categoria.id as idCategoria, categoria.descricao 
-            from produto
-            inner join categoria on categoria.id = produto.id_categoria;`
+        const produtos = await mysql.execute(
+            `select *from produto`
         )
-        const response = {
-            produtos: result.map(prod => {
-                return {
-                    id: prod.idProduto,
-                    preco: prod.preco,
-                    nome: prod.nome,
-                    quantidade: prod.quantidade,
-                    categoria: {
-                        id: prod.idCategoria,
-                        descricao: prod.descricao
-                    },
-                    request: {
-                        tipo: 'GET',
-                        descricao: 'Retorna todos os produtos',
-                        url: 'http://localhost:3000/produtos/'
-                    }
-                }
-            })
-        }
-        return res.status(200).send({ response })
+        // const response = {
+        //     produtos: result.map(prod => {
+        //         return {
+        //             id: prod.idProduto,
+        //             preco: prod.preco,
+        //             nome: prod.nome,
+        //             quantidade: prod.quantidade,
+        //             categoria: {
+        //                 id: prod.idCategoria,
+        //                 descricao: prod.descricao
+        //             },
+        //             request: {
+        //                 tipo: 'GET',
+        //                 descricao: 'Retorna todos os produtos',
+        //                 url: 'http://localhost:3000/produtos/'
+        //             }
+        //         }
+        //     })
+        // }
+        return res.status(200).send(produtos)
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }

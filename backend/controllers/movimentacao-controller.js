@@ -1,5 +1,24 @@
 const mysql = require('../mysql');
 
+exports.getMovimentacoes = async (req, res, next) => {
+    try {
+        const movimentacaoes = await mysql.execute(`
+        select movimentacao.id, 
+        movimentacao.data_hora, 
+        usuario.nome as usuario, 
+        produto.nome as produto, 
+        movimentacao.tipo, 
+        movimentacao.quantidade_old, 
+        movimentacao.quantidade_new
+        from movimentacao
+            inner join usuario on usuario.id = movimentacao.id_usuario
+            inner join produto on produto.id = movimentacao.id_produto;`);
+
+        return res.status(201).send(movimentacaoes);
+    } catch (error) {
+        return res.status(500).send({ error: error.message });
+    }
+};
 
 exports.postEntradaProdutoMovimentacao = async (req, res, next) => {
     try {

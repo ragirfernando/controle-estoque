@@ -8,6 +8,7 @@ const MovimentacaoController = require('../controllers/movimentacao-controller')
 
 router.post('/entrada', login, MovimentacaoController.postEntradaProdutoMovimentacao);
 router.post('/saida', login, MovimentacaoController.postSaidaProdutoMovimentacao);
+router.get('/movimentacoes', login, MovimentacaoController.getMovimentacoes);
 
 
 module.exports = router;
