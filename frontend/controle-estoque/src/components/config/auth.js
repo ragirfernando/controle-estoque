@@ -1,11 +1,10 @@
 import decode from 'jwt-decode';
-//import request from './request';
 import axios from 'axios';
-
+import {url} from './url'
 
 export async function signIn(login) {
     try {
-        const baseURL = 'http://localhost:3000/usuarios/login';
+        const baseURL = url+'usuarios/login';
         const response = await axios.post(baseURL, login);
         const {token} = response.data
         localStorage.setItem('token', token);
@@ -14,8 +13,6 @@ export async function signIn(login) {
         console.error(error);
         return false;
     }
-
-
 }
 
 export function signOut() {

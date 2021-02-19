@@ -2,46 +2,12 @@
   <div id="app" style="width: 95%; margin: auto">
     <v-app id="inspire">
       <br/>
+      <Header/>
       <v-card id="lateral">
-        <v-toolbar
-            dark
-            tabs
-            flat
-            color="indigo"
-        >
-
-
-          <template v-slot:extension>
-            <v-tabs
-                v-model="tabs"
-                align-with-title
-            >
-              <v-tab>
-                <router-link to="/produto"> Cadastrar Produto</router-link>
-
-              </v-tab>
-
-              <v-tab href="#three">
-                Cadastrar Categoria
-              </v-tab>
-
-              <v-tab href="#two">
-                Entrada
-              </v-tab>
-
-              <v-tab href="#three">
-                Saida
-              </v-tab>
-              <v-tabs-slider color="pink"></v-tabs-slider>
-            </v-tabs>
-          </template>
-        </v-toolbar>
         <router-view></router-view>
-        <br/><br/><br/>
-
         <v-card>
           <v-card-title>
-            <!--            Nutrition-->
+            Listas das movimentações
             <v-spacer></v-spacer>
             <v-text-field
                 v-model="search"
@@ -57,8 +23,6 @@
               :search="search"
           ></v-data-table>
         </v-card>
-
-
       </v-card>
     </v-app>
   </div>
@@ -68,9 +32,14 @@
 import {mapState} from 'vuex'
 import axios from 'axios';
 import {url, token} from './config/url';
+import Header from "./Header";
 
 export default {
   name: 'Home',
+
+  components: {
+    Header
+  },
 
   data: () => ({
     search: '',
@@ -96,22 +65,37 @@ export default {
 
   }),
   created() {
-    //this.$vuetify.theme.dark = true;
+    this.$vuetify.theme.dark = true;
     this.buscarMovimentacao();
   },
 
   methods: {
     buscarMovimentacao() {
-      axios.get(url+"movimentacao/movimentacoes",
+      let lista = []
+      axios.get(url + "movimentacao/movimentacoes",
           {headers: {Authorization: token}})
           .then(response => {
-            this.listaMovimentacoes = response.data;
+            response.data.forEach(mov => {
+              mov.data_hora = this.formatarData(mov.data_hora)
+              lista.push(mov)
+            })
+            this.listaMovimentacoes = lista;
           })
           .catch((error) => {
             console.log(error)
           })
-    }
+    },
+    formatarData(date) {
+      /*alert(date)*/
+      const dataTime = date.slice(0,10);
+      const data = dataTime.split("-")
+      const dataFormatada = data[2] + "/" + data[1] + "/" + data[0]
+
+      return dataFormatada;
+    },
+
   },
+
   computed: {
     ...mapState('auth', ['user']),
 

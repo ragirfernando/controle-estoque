@@ -12,7 +12,8 @@ exports.getMovimentacoes = async (req, res, next) => {
         movimentacao.quantidade_new
         from movimentacao
             inner join usuario on usuario.id = movimentacao.id_usuario
-            inner join produto on produto.id = movimentacao.id_produto;`);
+            inner join produto on produto.id = movimentacao.id_produto
+            ORDER BY movimentacao.id desc`);
 
         return res.status(201).send(movimentacaoes);
     } catch (error) {
@@ -29,12 +30,13 @@ exports.postEntradaProdutoMovimentacao = async (req, res, next) => {
         const usuarioEmail = await mysql.execute(`SELECT * FROM usuario WHERE email = ?`, [req.usuario.email]);
         const idUsuario = usuarioEmail[0].id;
         const quantidadeInformada = req.body.quantidade;
-        if(quantidadeInformada < 1 ){
-            return res.status(412).send({erro: "Informe a quantidade"});
+        if (quantidadeInformada < 1) {
+            return res.status(412).send({ erro: "Informe a quantidade" });
         }
 
-        const quantidadeNew = quantidadeProdutoOld + quantidadeInformada;
-        const tipoOperacao = req.body.tipo;
+
+
+        const quantidadeNew = quantidadeProdutoOld + parseInt(quantidadeInformada);
 
         const result = await mysql.execute(`UPDATE produto SET quantidade = ? WHERE id =?`, [quantidadeNew, req.body.id]);
 
@@ -46,18 +48,15 @@ exports.postEntradaProdutoMovimentacao = async (req, res, next) => {
             new Date(),
             idUsuario,
             idProduto,
-            tipoOperacao,
+            "Entrada",
             quantidadeProdutoOld,
             quantidadeNew
         ]);
 
         const response = {
             message: 'Entrada de produto realizada com sucesso',
-            request: {
-                type: 'POST'
-            }
-
         }
+
         return res.status(201).send(response);
     } catch (error) {
         return res.status(500).send({ error: error.message });
@@ -74,18 +73,17 @@ exports.postSaidaProdutoMovimentacao = async (req, res, next) => {
         const idUsuario = usuarioEmail[0].id;
         const quantidadeInformada = req.body.quantidade;
 
-        if(quantidadeInformada < 1 ){
-            return res.status(412).send({erro: "Informe a quantidade"});
+        if (quantidadeInformada < 1) {
+            return res.status(412).send({ erro: "Informe a quantidade" });
         }
 
-        if(quantidadeInformada > quantidadeProdutoOld ){
-            return res.status(412).send({erro: "Estoque insuficiente"});
+        if (quantidadeInformada > quantidadeProdutoOld) {
+            return res.status(412).send({ erro: "Estoque insuficiente" });
         }
 
 
-        const quantidadeNew = quantidadeProdutoOld - quantidadeInformada;
-        const tipoOperacao = req.body.tipo;
-
+        const quantidadeNew = quantidadeProdutoOld - parseInt(quantidadeInformada);
+        
         const result = await mysql.execute(`UPDATE produto SET quantidade = ? WHERE id =?`, [quantidadeNew, req.body.id]);
 
         const queryMovimentacao = `INSERT INTO movimentacao 
@@ -96,17 +94,13 @@ exports.postSaidaProdutoMovimentacao = async (req, res, next) => {
             new Date(),
             idUsuario,
             idProduto,
-            tipoOperacao,
+            "Saida",
             quantidadeProdutoOld,
             quantidadeNew
         ]);
 
         const response = {
             message: 'Saida de produto realizada com sucesso',
-            request: {
-                type: 'POST'
-            }
-
         }
         return res.status(201).send(response);
     } catch (error) {

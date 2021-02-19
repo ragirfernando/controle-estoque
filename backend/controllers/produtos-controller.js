@@ -12,7 +12,6 @@ exports.postProduto = async (req, res, next) => {
             req.body.quantidade,
         ]);
 
-
         const response = {
             produto: {
                 id: result.insertId,
@@ -63,28 +62,7 @@ exports.putProduto = async (req, res, next) => {
 exports.getProduto = async (req, res, next) => {
     console.log(req.usuario)
     try {
-        const produtos = await mysql.execute(
-            `select *from produto`
-        )
-        // const response = {
-        //     produtos: result.map(prod => {
-        //         return {
-        //             id: prod.idProduto,
-        //             preco: prod.preco,
-        //             nome: prod.nome,
-        //             quantidade: prod.quantidade,
-        //             categoria: {
-        //                 id: prod.idCategoria,
-        //                 descricao: prod.descricao
-        //             },
-        //             request: {
-        //                 tipo: 'GET',
-        //                 descricao: 'Retorna todos os produtos',
-        //                 url: 'http://localhost:3000/produtos/'
-        //             }
-        //         }
-        //     })
-        // }
+        const produtos = await mysql.execute(`select *from produto`)
         return res.status(200).send(produtos)
     } catch (error) {
         return res.status(500).send({ error: error.message })
@@ -93,39 +71,14 @@ exports.getProduto = async (req, res, next) => {
 
 exports.getProdutoId = async (req, res, next) => {
     try {
-        const query = `select produto.id as idProduto, produto.nome, produto.preco, produto.quantidade, categoria.id as idCategoria, categoria.descricao from produto
-        inner join categoria on categoria.id = produto.id_categoria
-        where produto.id = ?`;
+        const query = `select *from produto where id = ?`;
 
         const result = await mysql.execute(query, [
             req.body.id
         ]);
-        const response = {
-            produto: result.map(prod => {
-                return {
-                    id: prod.idProduto,
-                    nome: prod.nome,
-                    preco: prod.preco,
-                    quantidade: prod.quantidade,
-                    categoria: {
-                        id: prod.idCategoria,
-                        descricao: prod.descricao
-                    },
-                    request: {
-                        tipo: 'GET',
-                        descricao: 'Retorna produto por id',
-                        url: 'http://localhost:3000/produtos/'
-                    }
-                }
-            })
-
-        }
-        return res.status(200).send({ response })
+        
+        return res.status(200).send(result)
     } catch (error) {
         return res.status(500).send({ error: error.message })
     }
 }
-
-
-
-

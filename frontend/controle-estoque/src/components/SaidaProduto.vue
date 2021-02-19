@@ -1,7 +1,6 @@
 <template>
   <div id="app" style="width: 95%; margin: auto">
     <v-app id="inspire">
-      <br/>
       <Header/>
       <v-card id="lateral">
         <v-data-table :headers="nomeColunas" :items="produtos" :search="search">
@@ -17,7 +16,6 @@
                     single-line
                     hide-details
                 ></v-text-field>
-                <v-btn style="margin-left: 2%" @click="mostrarDialoFormularios">Novo Produto</v-btn>
               </v-card-title>
               <v-spacer></v-spacer>
 
@@ -35,30 +33,41 @@
                           :lazy-validation="lazy"
                       >
                         <v-row>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="12">
                             <v-text-field
                                 v-model="produto.nome"
+                                disabled
                                 label="Descriçao *"
                                 :rules="[v => !!v || 'Campo obrigatório']"
                             ></v-text-field>
                           </v-col>
 
 
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="12">
                             <v-text-field
                                 type="number"
-                                v-money="{ precision: 4 }"
+                                disabled
                                 v-model="produto.preco"
                                 label="Preço *"
                                 :rules="[v => !!v || 'Campo obrigatório']"
                             ></v-text-field>
                           </v-col>
 
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" md="12">
                             <v-text-field
                                 type="number"
+                                disabled
                                 v-model="produto.quantidade"
                                 label="Quantidade *"
+                                :rules="[v => !!v || 'Campo obrigatório']"
+                            ></v-text-field>
+                          </v-col>
+
+                          <v-col cols="12" sm="6" md="12">
+                            <v-text-field
+                                type="number"
+                                v-model="novaQuantidade"
+                                label="Nova quantidade *"
                                 :rules="[v => !!v || 'Campo obrigatório']"
                             ></v-text-field>
                           </v-col>
@@ -70,28 +79,29 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="white" text @click="dialogFormularios = false">Cancelar</v-btn>
-                    <v-btn color="white" text :disabled="!valid" @click="inserirProduto">Salvar</v-btn>
+                    <v-btn color="white" text :disabled="!valid" @click="inserirVeiculo">Salvar</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
             </v-toolbar>
           </template>
           <template v-slot:item.acoes="{item}">
-            <v-icon
-                small
-                class="mr-2"
-                @click="atualizarVeiculo(item)"
-            >
-              mdi-pencil
-            </v-icon>
+            <div>
+              <v-btn
+                  small
+                  color="primary"
+                  dark
+                  @click="atualizarProduto(item)"
+              >
+                Saida de produto
+              </v-btn>
+            </div>
           </template>
           <template v-slot:no-data>
             <v-card-subtitle>Nenhum veículo para ser mostrado.</v-card-subtitle>
           </template>
         </v-data-table>
-
         <router-view/>
-
       </v-card>
     </v-app>
   </div>
@@ -109,6 +119,7 @@ export default {
     Header
   },
   data: () => ({
+    novaQuantidade: null,
     valid: true,
     lazy: false,
     categorias: [],
@@ -123,7 +134,6 @@ export default {
       nome: "",
       preco: null,
       quantidade: null,
-
     },
     nomeColunas: [
       {text: "ID", align: "start", class: "subtitle-2 Bold text", sortable: false, value: "id"},
@@ -135,33 +145,33 @@ export default {
   }),
   created() {
     this.$vuetify.theme.dark = true;
-    this.listarProdutos();
+    this.buscarProdutos();
   },
   methods: {
-    inserirProduto() {
-      if (this.produto.id == null) {
-        axios.post(url + "produtos/cadastrar", this.produto, {headers: {Authorization: token}}).then(response => {
-          this.produtos = response.data;
-        }).catch((error) => {
-          console.log(error)
-        })
-      } else {
-        axios.put(url + "produtos/atualizar", this.produto, {headers: {Authorization: token}}).then(response => {
-          this.produtos = response.data;
 
+    inserirVeiculo() {
+
+      if (this.novaQuantidade > this.produto.quantidade) {
+        alert("Estoque Insuficiente")
+      } else {
+
+        this.produto.quantidade = this.novaQuantidade
+        axios.post(url + "movimentacao/saida", this.produto, {headers: {Authorization: token}}).then(response => {
+          console.log(response.data);
         }).catch((error) => {
           console.log(error)
         })
+
+        this.buscarProdutos();
+        this.dialogFormularios = false;
       }
-      this.dialogFormularios = false;
-      this.listarProdutos();
     },
-    atualizarVeiculo(item) {
-      this.novoOuAtualizar = "Atualizar produto"
+    atualizarProduto(item) {
+      this.novoOuAtualizar = "Atualizar veículo"
       this.produto = Object.assign({}, item);
       this.dialogFormularios = true;
     },
-    listarProdutos() {
+    buscarProdutos() {
       axios.get(url + "produtos/produtos", {headers: {Authorization: token}}).then(response => {
         this.produtos = response.data;
         console.log(response.data)
@@ -169,7 +179,6 @@ export default {
         console.log(error)
       })
     },
-
     mostrarDialoFormularios() {
       axios.get(url + "categoria", {headers: {Authorization: token}}).then(response => {
         this.categorias = response.data;
@@ -178,7 +187,7 @@ export default {
         console.log(error)
       })
       this.dialogFormularios = true;
-      this.novoOuAtualizar = "Inserir novo produto";
+      this.novoOuAtualizar = "Inserir novo veículo";
       this.reset();
     },
     reset() {
